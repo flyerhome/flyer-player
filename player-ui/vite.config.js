@@ -1,5 +1,8 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
+import Components from 'unplugin-vue-components/vite';
+import { AntDesignVueResolver } from 'unplugin-vue-components/resolvers';
+import compression from 'vite-plugin-compression';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -18,5 +21,19 @@ export default defineConfig({
   build:{
     outDir:'./deploy'
   },
-  plugins: [vue()],
+  plugins: [
+      vue(),
+
+    Components({
+      resolvers: [
+        AntDesignVueResolver({
+          importStyle: false, // css in js
+        }),
+      ],
+    }),
+    compression({
+      algorithm: 'gzip', // 启用 gzip 压缩
+      threshold: 10240 // 超过 10KB 的文件才压缩
+    })
+  ],
 })

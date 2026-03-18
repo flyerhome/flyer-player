@@ -1,14 +1,31 @@
 <script setup>
 import Hls from 'hls.js'
 import {onBeforeUnmount, onMounted, ref} from "vue";
-const videoUrl = 'https://vip.lz-cdn9.com/20220521/10886_5b22593a/index.m3u8'
+import {aget} from "../utils/Http.js";
+// const videoUrl = 'https://vip.lz-cdn9.com/20220521/10886_5b22593a/index.m3u8'
+const videoUrl = '/api/hls/c1/index.m3u8'
+const dataList = ref([])
 // hls实例（用于销毁，防止内存泄漏）
 let hlsInstance = null
 const videoRef = ref()
+const queryList = () => {
+  aget('/api/player/list', (res)=> {
+    console.log('查询结果', res)
+    if (res.success) {
+      dataList.value = res.data
+    }
+  }, (e) => {
 
-// 组件挂载后初始化播放器
-onMounted(() => {
+  })
+}
+
+const loadVideo = (url) => {
   const videoElement = videoRef.value
+  if (hlsInstance) {
+    hlsInstance.loadSource(url)
+    return;
+  }
+
   if (!videoElement) return
 
   // 1. 检测浏览器是否支持hls.js
@@ -21,13 +38,14 @@ onMounted(() => {
     })
 
     // 绑定视频源
-    hlsInstance.loadSource(videoUrl)
+    hlsInstance.loadSource(url)
     hlsInstance.attachMedia(videoElement)
 
     // 监听资源解析完成事件
     hlsInstance.on(Hls.Events.MANIFEST_PARSED, () => {
       console.log('HLS视频解析成功，可播放')
       // 如需自动播放，浏览器限制必须静音或用户交互后触发
+      videoElement.play()
     })
 
     // 监听错误事件
@@ -54,8 +72,14 @@ onMounted(() => {
   }
   // 兼容Safari原生HLS支持
   else if (videoElement.canPlayType('application/vnd.apple.mpegurl')) {
-    videoElement.src = videoUrl
+    videoElement.src = url
+    videoElement.play()
   }
+}
+
+// 组件挂载后初始化播放器
+onMounted(() => {
+  queryList();
 })
 
 // 销毁实例：组件卸载时清理，防止内存泄漏
@@ -73,10 +97,29 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-<div style="position: relative;padding: 0;z-index: 999;width:100%;height: 100%;background: #bbb; display: flex;justify-content: center;align-items: center;flex-direction: column">
-  <video ref="videoRef" controls style="width: 90%;height: 90%;background: white;">
+<div style="position: relative;padding: 0;z-index: 999;width:100%;height: 100%;background: #58e6f8;">
+  <a-row style="height:80%;padding:10px;font-size: 26px;">
+    <a-col :span="6">
+      <a-list item-layout="horizontal" :data-source="dataList">
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <a-list-item-meta
+            >
+              <template #title>
+                <a @click="loadVideo('/api' + item.url)"  style="font-size: 26px;">{{ item.name }}</a>
+              </template>
+            </a-list-item-meta>
+          </a-list-item>
+        </template>
+      </a-list>
+    </a-col>
+    <a-col :span="16">
+      <video ref="videoRef" controls style="width: 100%;height: 100%;background: white;">
 
-  </video>
+      </video>
+    </a-col>
+  </a-row>
+
 </div>
 </template>
 
