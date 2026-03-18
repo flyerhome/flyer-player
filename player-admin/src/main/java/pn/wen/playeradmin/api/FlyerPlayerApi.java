@@ -16,7 +16,10 @@ public class FlyerPlayerApi {
     public FlyerResult<?> download(@RequestBody FlyerDownloadDto dto) {
         return playerService.download(dto);
     }
-
+    @CrossOrigin(
+            origins = "https://flyerhome.github.io", // 允许的前端域名（精准控制）
+            methods = {RequestMethod.GET}, // 允许的请求方法
+            allowedHeaders = "Content-Type")
     @GetMapping("/list")
     public FlyerResult<?> list() {
         return playerService.list();

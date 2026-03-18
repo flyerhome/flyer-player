@@ -9,7 +9,7 @@ const dataList = ref([])
 let hlsInstance = null
 const videoRef = ref()
 const queryList = () => {
-  aget('http://localhost:8008/api/player/list', (res)=> {
+  aget('http://localhost:8009/player/list', (res)=> {
     console.log('查询结果', res)
     if (res.success) {
       dataList.value = res.data
@@ -106,7 +106,7 @@ onBeforeUnmount(() => {
             <a-list-item-meta
             >
               <template #title>
-                <a @click="loadVideo('http://localhost:8008/api' + item.url)"  style="font-size: 26px;">{{ item.name }}</a>
+                <a @click="loadVideo('http://localhost:8009' + item.url)"  style="font-size: 26px;">{{ item.name }}</a>
               </template>
             </a-list-item-meta>
           </a-list-item>

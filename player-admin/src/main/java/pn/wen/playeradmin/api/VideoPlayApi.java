@@ -23,7 +23,11 @@ public class VideoPlayApi {
      * @param request 请求对象
      * @return 视频分片数据流
      */
-    @GetMapping("/{fileName}")
+    @CrossOrigin(
+            origins = "https://flyerhome.github.io", // 允许的前端域名（精准控制）
+            methods = {RequestMethod.GET}, // 允许的请求方法
+            allowedHeaders = "Content-Type")
+    @GetMapping(value = "/{fileName}")
     public ResponseEntity<byte[]> fileName(@PathVariable String fileName, HttpServletRequest request) {
         return playerService.fileName(fileName, request);
     }
