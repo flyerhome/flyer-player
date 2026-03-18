@@ -120,7 +120,7 @@ onBeforeUnmount(() => {
     </a-col>
   </a-row>
   <a-row style="height:80%;padding:10px;font-size: 26px;">
-    <a-col :span="6">
+    <a-col v-if="!!dataList.value" :span="6">
       <a-list item-layout="horizontal" :data-source="dataList">
         <template #renderItem="{ item }">
           <a-list-item>
@@ -134,7 +134,7 @@ onBeforeUnmount(() => {
         </template>
       </a-list>
     </a-col>
-    <a-col :span="16">
+    <a-col :span="!!dataList.value ? 16 : 24">
       <video ref="videoRef" controls style="width: 100%;height: 100%;background: white;">
 
       </video>
