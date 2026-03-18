@@ -2,7 +2,7 @@
 import Hls from 'hls.js'
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import {aget} from "../utils/Http.js";
-const serverAddress = ref('http://localhost:8008/api')
+const serverAddress = ref('')
 const dataList = ref([])
 // hls实例（用于销毁，防止内存泄漏）
 let hlsInstance = null
@@ -93,7 +93,7 @@ const keyup = (e) => {
 }
 // 组件挂载后初始化播放器
 onMounted(() => {
-  queryList();
+  // queryList();
 })
 
 // 销毁实例：组件卸载时清理，防止内存泄漏
@@ -114,7 +114,7 @@ onBeforeUnmount(() => {
 <div style="position: relative;padding: 0;z-index: 999;width:100%;height: 100%;background: #58e6f8;">
   <a-row style="height:10%;padding:10px;font-size: 26px;">
     <a-col :span="10">
-      <a-form-item label="服务器地址或你的视频地址" name="serverAddress">
+      <a-form-item label="视频地址(m3u8)" name="serverAddress">
         <a-input type="text" v-model:value="serverAddress" @keyup="keyup"/>
       </a-form-item>
     </a-col>

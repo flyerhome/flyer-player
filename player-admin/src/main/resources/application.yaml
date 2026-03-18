@@ -8,4 +8,8 @@ spring:
   mvc:
     static-path-pattern: /hls/**
 server:
-  port: 8009
+  port: 8443 # HTTPS 默认端口
+  ssl:
+    key-store: classpath:springboot-https.p12 # 证书文件路径
+    key-store-password: 123456 # 证书密码
+    key-store-type: PKCS12
