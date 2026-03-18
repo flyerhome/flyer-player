@@ -2,17 +2,20 @@
 import Hls from 'hls.js'
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import {aget} from "../utils/Http.js";
-// const videoUrl = 'https://vip.lz-cdn9.com/20220521/10886_5b22593a/index.m3u8'
-const videoUrl = '/api/hls/c1/index.m3u8'
+const serverAddress = ref('http://localhost:8008/api')
 const dataList = ref([])
 // hls实例（用于销毁，防止内存泄漏）
 let hlsInstance = null
 const videoRef = ref()
-const queryList = () => {
-  aget('http://localhost:8009/player/list', (res)=> {
+const queryList = (call) => {
+  dataList.value = []
+  aget(serverAddress.value + '/player/list', (res)=> {
     console.log('查询结果', res)
     if (res.success) {
       dataList.value = res.data
+      if (!!call) {
+        call()
+      }
     }
   }, (e) => {
 
@@ -77,6 +80,17 @@ const loadVideo = (url) => {
   }
 }
 
+const keyup = (e) => {
+  if(e.key === 'Enter') {
+    if (serverAddress.value.endsWith('.m3u8')) {
+      loadVideo(serverAddress.value)
+      return;
+    }
+    queryList(()=> {
+      loadVideo(serverAddress + dataList[0].url)
+    })
+  }
+}
 // 组件挂载后初始化播放器
 onMounted(() => {
   queryList();
@@ -98,6 +112,13 @@ onBeforeUnmount(() => {
 
 <template>
 <div style="position: relative;padding: 0;z-index: 999;width:100%;height: 100%;background: #58e6f8;">
+  <a-row style="height:10%;padding:10px;font-size: 26px;">
+    <a-col :span="10">
+      <a-form-item label="服务器地址或你的视频地址" name="serverAddress">
+        <a-input type="text" v-model:value="serverAddress" @keyup="keyup"/>
+      </a-form-item>
+    </a-col>
+  </a-row>
   <a-row style="height:80%;padding:10px;font-size: 26px;">
     <a-col :span="6">
       <a-list item-layout="horizontal" :data-source="dataList">
@@ -106,7 +127,7 @@ onBeforeUnmount(() => {
             <a-list-item-meta
             >
               <template #title>
-                <a @click="loadVideo('http://localhost:8009' + item.url)"  style="font-size: 26px;">{{ item.name }}</a>
+                <a @click="loadVideo(serverAddress + item.url)"  style="font-size: 26px;">{{ item.name }}</a>
               </template>
             </a-list-item-meta>
           </a-list-item>
