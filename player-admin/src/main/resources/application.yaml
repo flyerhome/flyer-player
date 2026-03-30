@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: player-admin
+
+#  web:
+#    resources:
+#      # 映射本地HLS分片目录到 /hls/** 访问路径
+#      static-locations: file:F:/study/m3u8
+#  mvc:
+#    static-path-pattern: /hls/**
+server:
+  port: 8009 # HTTPS 默认端口
