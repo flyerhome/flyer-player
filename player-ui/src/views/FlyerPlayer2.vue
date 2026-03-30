@@ -2,6 +2,7 @@
 import Hls from 'hls.js'
 import {onBeforeUnmount, onMounted, ref} from "vue";
 import {aget} from "../utils/Http.js";
+const serverAddress = ref('/api')
 const dataList = ref([])
 // hls实例（用于销毁，防止内存泄漏）
 let hlsInstance = null
@@ -11,7 +12,7 @@ const controls = ref(false)
 
 const queryList = (call) => {
   dataList.value = []
-  aget('/player/list', (res)=> {
+  aget(serverAddress.value + '/player/list', (res)=> {
     console.log('查询结果', res)
     if (res.success) {
       dataList.value = res.data
@@ -25,7 +26,6 @@ const queryList = (call) => {
 }
 
 const loadVideo = (url) => {
-  url = import.meta.env.VITE_APP_API_URL + url
   const videoElement = videoRef.value
   if (hlsInstance) {
     hlsInstance.loadSource(url)
@@ -86,6 +86,18 @@ const loadVideo = (url) => {
     webSpeech()
   }
 }
+
+const keyup = (e) => {
+  if(e.key === 'Enter') {
+    if (serverAddress.value.endsWith('.m3u8')) {
+      loadVideo(serverAddress.value)
+      return;
+    }
+    queryList(()=> {
+      loadVideo(serverAddress + dataList[0].url)
+    })
+  }
+}
 let recognition = null;
 const webSpeech = () => {
   const video = videoRef.value;
@@ -109,47 +121,25 @@ function skip(seconds) {
   video.currentTime += seconds;
 }
 const playState = ref(0);
-function togglePlay() {
+function play() {
   const video = videoRef.value;
   video.paused ? video.play() : video.pause();
 
 }
-function play() {
-  const video = videoRef.value;
-  video.play()
-}
-function stop() {
-  const video = videoRef.value;
-  video.pause()
-}
-function setSpeed(rate) {
-  const video = videoRef.value;
-  video.playbackRate = rate;
-}
-
-function setVolumn(e, val1, val2) {
-  const video = videoRef.value;
-  console.log("change volumn", volumnVal.value)
-  video.volume = volumnVal.value/100
-}
 document.addEventListener('keydown', (e) => {
   console.log("keydown", e.key, e.code)
-  if (e.key === 'ArrowLeft') skip(-2);
-  if (e.key === 'ArrowRight') skip(2);
+  if (e.key === 'ArrowLeft') skip(-3);
+  if (e.key === 'ArrowRight') skip(3);
 })
 document.addEventListener('keyup', (e) => {
   if (e.code === 'Space') {
-    togglePlay()
+    play()
   }
 })
 
 // 组件挂载后初始化播放器
 onMounted(() => {
-  queryList(() => {
-    const item = dataList.value[0]
-    movieItem.value = item.url
-    loadVideo(item.url)
-  });
+  queryList();
 })
 
 // 销毁实例：组件卸载时清理，防止内存泄漏
@@ -164,37 +154,32 @@ const destroyHls = () => {
 onBeforeUnmount(() => {
   destroyHls()
 })
-const speedVal = ref(1)
-const volumnVal = ref(10)
-const movieItem = ref()
-
-
-window.addEventListener('beforeunload', () => {
-  console.log("检测到unload")
-  const video = videoRef.value
-  if (video) {
-    localStorage.setItem('video_last_time_' + movieItem.value, video.currentTime)
-  }
-})
-// 恢复播放进度
-function resumePlayTime() {
-  const video = videoRef.value
-  if (!video) return
-
-  const lastTime = localStorage.getItem('video_last_time_' + movieItem.value)
-  if (lastTime && !isNaN(lastTime)) {
-    video.currentTime = Number(lastTime)
-  }
-}
 </script>
 
 <template>
-<div style="position: relative;padding: 5px;z-index: 999;width:100%;height: 100%;background: #bdedf6;display: flex;justify-content: start;align-items: center;flex-direction: column">
-  <a-select v-model:value="movieItem" @change="(val) => loadVideo(val)" style="width: calc(88%);margin-bottom: 10px;" placeholder="选择聚集">
-    <a-select-option v-for="item in dataList" :value="item.url">{{ item.name }}</a-select-option>
-  </a-select>
-  <video ref="videoRef" @loadedmetadata="resumePlayTime" :controls="controls" style="background: none;width:88%;height:80%;" @mouseover="()=> controls = true" @mouseleave="()=> controls = false">
-  </video>
+<div style="position: relative;padding: 0;z-index: 999;width:100%;height: 100%;background: #58e6f8;">
+  <a-row style="height:70%;padding:10px;font-size: 26px;">
+    <a-col :span="6">
+      <a-list item-layout="horizontal" :data-source="dataList">
+        <template #renderItem="{ item }">
+          <a-list-item>
+            <a-list-item-meta
+            >
+              <template #title>
+                <a @click="loadVideo(serverAddress + item.url)"  style="font-size: 26px;">{{ item.name }}</a>
+              </template>
+            </a-list-item-meta>
+          </a-list-item>
+        </template>
+      </a-list>
+    </a-col>
+    <a-col :span="16">
+      <video ref="videoRef" :controls="controls" style="background: none;width: 100%;height: 100%;padding:0;" @mouseover="()=> controls = true" @mouseleave="()=> controls = false">
+
+      </video>
+
+    </a-col>
+  </a-row>
 
 </div>
 </template>

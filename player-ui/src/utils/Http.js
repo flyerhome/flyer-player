@@ -3,6 +3,8 @@ import {logger} from "./Global.js";
 
 const https = axios
 
+axios.defaults.baseURL = import.meta.env.VITE_APP_API_URL
+console.log("看看baseURL", import.meta.env)
 function get(url, success, error, execute) {
     https.get(url)
         .then(function (response) {
