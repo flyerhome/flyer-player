@@ -10,7 +10,7 @@
     </parent>
     <groupId>pn.wen</groupId>
     <artifactId>player-admin</artifactId>
-    <version>0.0.1-SNAPSHOT</version>
+    <version>1.0</version>
     <name>player-admin</name>
     <description>player-admin</description>
     <url/>
