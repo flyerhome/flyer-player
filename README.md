@@ -5,4 +5,4 @@
     * http(s)://域名/flyer-player/
 
 # 截图
-  ![flyer_player_img_001.jpeg](player-ui/flyer_player_img_001.jpeg)
+  ![img.png](img.png)
